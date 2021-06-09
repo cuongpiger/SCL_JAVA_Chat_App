@@ -5,27 +5,19 @@ import modules.Package;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-class LoginController implements Runnable {
-    Socket iSocket = null;
-    ObjectInputStream pInStream = null;
-    Thread iThread = null;
-
-
-    public void run() {
-
-    }
-}
 
 class ServerController implements Runnable {
     Socket iSocket = null;
     ObjectInputStream iInStream = null;
-    PrintWriter iOutStream = null;
+    ObjectOutputStream iOutStream = null;
     Thread iThread = null;
     Map iClients = null;
 
@@ -35,15 +27,11 @@ class ServerController implements Runnable {
 
         try {
             iInStream = new ObjectInputStream(iSocket.getInputStream());
-            iOutStream = new PrintWriter(iSocket.getOutputStream(), true);
+            iOutStream = new ObjectOutputStream(iSocket.getOutputStream());
             iThread = new Thread(this);
             iThread.start();
             iThread.join();
-        } catch (IOException err) {
-            System.out.println(err);
-            System.exit(1);
-        } catch (InterruptedException err) {
-            System.out.println(err);
+        } catch (InterruptedException | IOException err) {
             System.exit(1);
         }
     }
@@ -57,18 +45,58 @@ class ServerController implements Runnable {
 
                 synchronized (iClients) {
                     if (iClients.containsKey(user.getiAccount())) {
-                        iOutStream.println(0);
+                        sendPackage("0", null);
                     } else {
                         iClients.put(user.getiAccount(), user.getiPassword());
-                        iOutStream.println(1);
+                        sendPackage("1", null);
                     }
                 }
+            } else if (box.getiMessage().equals("SIGN-IN")) {
+                User user = (User) box.getiContent();
+
+                synchronized (iClients) {
+                    if (iClients.containsKey(user.getiAccount())) {
+                        if (iClients.get(user.getiAccount()).equals(user.getiPassword())) {
+                            sendPackage("1", null);
+                        } else {
+                            sendPackage("1", null);
+                        }
+                    } else {
+                        sendPackage("0", null);
+                    }
+                }
+            } else if (box.getiMessage().equals("LOAD-CLIENTS")) {
+                ArrayList<String> clients = new ArrayList<String>();
+
+                for (var key : iClients.keySet()) {
+                    clients.add((String) key);
+                }
+
+                sendPackage("UPDATE-CLIENTS", clients);
             }
         } catch (IOException | ClassNotFoundException err) {
-            System.out.println(err);
             System.exit(1);
         }
+    }
 
+    private void sendPackage(String pMessage, Object pContent) {
+        Package box = new Package("SERVER", pMessage, pContent);
+        try {
+            iOutStream.writeObject(box);
+        } catch (IOException err) {
+            System.exit(1);
+        }
+    }
+
+    private Object receivePackage() {
+        try {
+            Package box = (Package) iInStream.readObject();
+            return box.getiContent();
+        } catch (IOException e) {
+            return null;
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 }
 
@@ -80,6 +108,8 @@ public class Server {
     public static void main(String[] args) {
         iServer = Utils.loadHostInfo("./config/master.txt");
         iClients = new HashMap<String, String>();
+        User cuongpiger = new User("cuongpiger", "Cuong*0902902209");
+        iClients.put(cuongpiger.getiAccount(), cuongpiger.getiPassword());
 
         try {
             iSocket = new ServerSocket(iServer.getiPort());
@@ -92,7 +122,7 @@ public class Server {
         do {
             try {
                 Socket client = iSocket.accept();
-                ServerController server_controller = new ServerController(client, iClients);
+                new ServerController(client, iClients);
             } catch (IOException err) {
 
             }

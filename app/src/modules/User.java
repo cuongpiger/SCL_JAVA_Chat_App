@@ -1,16 +1,17 @@
 package modules;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class User {
+public class User implements Serializable {
     private String iAccount = null;
     private String iPassword = null;
 
     public User(String pAccount, String pPassword) {
         iAccount = pAccount;
-        iPassword = sha256(pPassword);
+        iPassword = new String(pPassword);
     }
 
     public String getiAccount() {
@@ -21,7 +22,7 @@ public class User {
         return iPassword;
     }
 
-    private static String sha256(String pPassword) {
+    public static String sha256(String pPassword) {
         try {
             MessageDigest iSha256 = MessageDigest.getInstance("SHA-256");
             byte[] hash = iSha256.digest(pPassword.getBytes(StandardCharsets.UTF_8));
