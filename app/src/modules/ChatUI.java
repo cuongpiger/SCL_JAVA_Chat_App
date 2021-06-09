@@ -19,13 +19,13 @@ public class ChatUI extends JFrame implements ActionListener {
     private JTextField vAcc;
     private JButton vConn;
     public ClientController client_controller = null;
-    public static Map<String, JFrame> iFrames = null;
+    public static Map<String, ChatBoxUI> iFrames = null;
 
     public ChatUI() {
         super("Chat App");
         setContentPane(main_panel);
         vConn.addActionListener(this);
-        iFrames = new HashMap<String, JFrame>();
+        iFrames = new HashMap<String, ChatBoxUI>();
 
         try {
             client_controller = new ClientController(this);
@@ -34,9 +34,15 @@ public class ChatUI extends JFrame implements ActionListener {
         }
     }
 
+    public static void addChatBoxUI(Message mess) {
+        var chatbox = createNewChatBox(mess.getIFrom());
+        chatbox.vContent.append(mess.getIFrom() + ": " + mess.getiContent() + "\n");
+        iFrames.put(mess.getIFrom(), chatbox);
+        chatbox.setVisible(true);
+    }
 
-    private JFrame createNewChatBox(String friend) {
-        JFrame frame = new ChatBoxUI(friend);
+    private static ChatBoxUI createNewChatBox(String friend) {
+        ChatBoxUI frame = new ChatBoxUI(friend);
         frame.setSize(400, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);

@@ -43,6 +43,17 @@ public class ClientController implements Runnable {
                     }
                     iUI.vChat.append(client + "\n");
                 }
+            } else if (box.getiMessage().equals("CHATTING")) {
+                Message mess = (Message) box.getiContent();
+
+                for (var friend : ChatUI.iFrames.keySet()) {
+                    if (friend.equals(mess.getIFrom())) {
+                        ChatUI.iFrames.get(friend).vContent.append(mess.getIFrom() + ": " + mess.getiContent() + "\n");
+                        return;
+                    }
+                }
+
+                ChatUI.addChatBoxUI(mess);
             }
         }
     }

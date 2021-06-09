@@ -12,6 +12,10 @@ public class ChatBoxUI extends JFrame implements ActionListener {
     public JButton vSend;
     public JButton vFile;
 
+    public JTextArea getvContent() {
+        return vContent;
+    }
+
     public ChatBoxUI(String pTitle) {
         super(pTitle);
         setContentPane(panel1);
