@@ -1,9 +1,11 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="demo_connect_mssql_database_with_docker:jar">
+  <artifact name="demo_connect_mssql_database_with_docker:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/demo_connect_mssql_database_with_docker_jar</output-path>
-    <root id="archive" name="demo_connect_mssql_database_with_docker.jar">
-      <element id="module-output" name="demo_connect_mssql_database_with_docker" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../../dependencies/mssql-jdbc-9.2.1.jre11.jar" path-in-jar="/" />
+    <root id="root">
+      <element id="archive" name="demo_connect_mssql_database_with_docker.jar">
+        <element id="module-output" name="demo_connect_mssql_database_with_docker" />
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/../../dependencies/mssql-jdbc-9.2.1.jre11.jar" />
     </root>
   </artifact>
 </component>

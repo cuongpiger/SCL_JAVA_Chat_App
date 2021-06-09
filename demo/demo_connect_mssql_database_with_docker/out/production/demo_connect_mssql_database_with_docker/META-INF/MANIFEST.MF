@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
 Main-Class: App
+Class-Path: mssql-jdbc-9.2.1.jre11.jar
 
