@@ -11,7 +11,7 @@ public class Message implements Serializable {
         iContent = pContent;
     }
 
-    public String getIFrom() {
+    public String getiFrom() {
         return iFrom;
     }
 

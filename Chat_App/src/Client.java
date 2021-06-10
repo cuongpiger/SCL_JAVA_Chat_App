@@ -1,13 +1,10 @@
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 class ClientListener extends Thread {
@@ -53,12 +50,15 @@ class ClientListener extends Thread {
                         iUI.showDialog("Dang nhap ko thanh cong");
                     } else {
                         iUI.setVisible(false);
-                        iClient.showHomePage();
+                        iUI.showHomePage();
                     }
                 } else if (box.getiService().equals("NEW-CLIENT")) {
                     ArrayList<String> clients = (ArrayList<String>) box.getiContent();
                     clients.remove(iClient.getiUsername());
-                    iClient.updateHomepage(clients);
+                    iUI.updateHomepage(clients);
+                } else if (box.getiService().equals("CHATTING")) {
+                    Message message = (Message) box.getiContent();
+                    iUI.updateChatUI(message);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -72,26 +72,10 @@ public class Client extends Thread {
     private static String iUsername;
     private static ObjectOutputStream iOutStream;
     private static SigninUI iUI;
-    private static HomeUI iHomeUI;
-    private static Map<String, ChatUI> iChatUIs;
 
     public Client(SigninUI pUI) {
         iServer = Utils.loadHostInfo("./config/master.txt");
         iUI = pUI;
-    }
-
-    public void showHomePage() {
-        iChatUIs = new HashMap<String, ChatUI>();
-
-        iHomeUI = new HomeUI("Home", iChatUIs);
-        iHomeUI.setSize(350, 500);
-        iHomeUI.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        iHomeUI.setLocationRelativeTo(null);
-        iHomeUI.setVisible(true);
-    }
-
-    public void updateHomepage(ArrayList<String> pClients) {
-        iHomeUI.updateHomepage(pClients);
     }
 
     public void setiUsername(String pUsername) {

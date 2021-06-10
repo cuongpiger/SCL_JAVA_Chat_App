@@ -4,6 +4,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HomeUI extends JFrame implements ActionListener {
@@ -13,14 +14,27 @@ public class HomeUI extends JFrame implements ActionListener {
     private JTextArea vClients;
     private static Map<String, ChatUI> iUIs;
     private static ArrayList<String> iActiveClients;
+    private static Client iClient;
 
-    public HomeUI(String pTitle, Map<String, ChatUI> pUIs) {
+    public HomeUI(String pTitle, Client pClient) {
         super(pTitle);
-        iUIs = pUIs;
+        iClient = pClient;
+        iUIs = new HashMap<String, ChatUI>();
 
         setContentPane(panel1);
         vClients.setEditable(false);
         vChat.addActionListener(this);
+    }
+
+    public void updateChatUI(Message pMessage) {
+        ChatUI ui = iUIs.get(pMessage.getiFrom());
+
+        if (ui == null) {
+            ui = creatNewChatUI(pMessage.getiFrom());
+            iUIs.put(pMessage.getiFrom(), ui);
+        }
+
+        ui.appendvContent(pMessage);
     }
 
     public void updateHomepage(ArrayList<String> pClients) {
@@ -33,7 +47,7 @@ public class HomeUI extends JFrame implements ActionListener {
     }
 
     private ChatUI creatNewChatUI(String pFriend) {
-        ChatUI chat_ui = new ChatUI(pFriend);
+        ChatUI chat_ui = new ChatUI(pFriend, iClient);
         chat_ui.setSize(350, 500);
         chat_ui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         chat_ui.setLocationRelativeTo(null);

@@ -49,7 +49,7 @@ public class Server {
 
     public void sendMessage(Message pMessage) {
         ClientThread client = iClients.get(pMessage.getiTo());
-        client.sendPackage("SEND-MESSAGE", pMessage);
+        client.sendPackage("CHATTING", pMessage);
     }
 
     public void execute() {
