@@ -49,8 +49,9 @@ public class ChatUI extends JFrame implements ActionListener {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 String file_path = selectedFile.getAbsolutePath();
+                new Shipper(iClient.getiUsername(), iFriend, file_path).start();
 
-
+                vContent.append("Me: [FILE] " + selectedFile.getName() + "\n");
             }
         }
     }

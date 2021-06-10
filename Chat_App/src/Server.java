@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Server extends Thread {
+public class Server {
     private static HostInfo iLocal = null;
     private static Map<String, String> iUsers = null;
     private static Map<String, ClientThread> iClients = null;
@@ -54,7 +54,8 @@ public class Server extends Thread {
         client.sendPackage("CHATTING", pMessage);
     }
 
-    public void run() {
+    public void execute() {
+        new FileServer(this).start();
         try (ServerSocket server_socket = new ServerSocket(iLocal.getiPort())) {
             System.out.println("Server is running on PORT: " + iLocal.getiPort());
 
@@ -75,6 +76,6 @@ public class Server extends Thread {
 
     public static void main(String[] args) throws SocketException {
         Server server = new Server();
-        server.start();
+        server.execute();
     }
 }
