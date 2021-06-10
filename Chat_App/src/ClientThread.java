@@ -19,7 +19,7 @@ public class ClientThread extends Thread {
     private Object receivePackage() {
         try {
             Package box = (Package) iInStream.readObject();
-            return box.getiContent();
+            return box;
         } catch (IOException e) {
             return null;
         } catch (ClassNotFoundException e) {
@@ -37,40 +37,41 @@ public class ClientThread extends Thread {
     }
 
     public void run() {
-        try {
-            Package box = (Package) receivePackage();
+        while (true) {
+            try {
+                Package box = (Package) receivePackage();
 
-            if (box.getiService().equals("SIGN-UP")) {
-                User user = (User) box.getiContent();
-                sendPackage("SIGN-UP", iServer.signup(user));
-                iSocket.close();
-            } else if (box.getiService().equals("SIGN-IN")) {
-                User user = (User) box.getiContent();
+                if (box.getiService().equals("SIGN-UP")) {
+                    User user = (User) box.getiContent();
+                    sendPackage("SIGN-UP", iServer.signup(user));
+                } else if (box.getiService().equals("SIGN-IN")) {
+                    User user = (User) box.getiContent();
 
-                if (iServer.signin(user)) { // login success
-                    sendPackage("SIGN-IN", true);
-                    iServer.broadcast(); // broadcast new users joined
+                    if (iServer.signin(user)) { // login success
+                        sendPackage("SIGN-IN", true);
+                        iServer.addNewClient(user.getiAccount(), this);
+                        iServer.broadcast(); // broadcast new users joined
 
-                    do {
-                        box = (Package) receivePackage();
+                        do {
+                            box = (Package) receivePackage();
 
-                        if (box.getiService().equals("CHATTING")) {
-                            Message message = (Message) box.getiContent();
-                            iServer.sendMessage(message);
-                        }
-                    } while (!box.getiService().equals("CLOSE"));
+                            if (box.getiService().equals("CHATTING")) {
+                                Message message = (Message) box.getiContent();
+                                iServer.sendMessage(message);
+                            }
+                        } while (!box.getiService().equals("CLOSE"));
 
-                    iServer.removeClient(user.getiPassword());
-                    iSocket.close();
+                        iServer.removeClient(user.getiPassword());
+                        iSocket.close();
 
-                    iServer.broadcast();
-                } else { // login failed
-                    sendPackage("SIGN-IN", false);
-                    iSocket.close();
+                        iServer.broadcast();
+                    } else { // login failed
+                        sendPackage("SIGN-IN", false);
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

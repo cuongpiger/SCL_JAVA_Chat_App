@@ -14,7 +14,7 @@ public class Server {
     public Server() {
         iLocal = Utils.loadHostInfo("./config/master.txt");
         iUsers = new HashMap<String, String>();
-
+        iClients = new HashMap<String, ClientThread>();
     }
 
     public boolean signup(User pNewUser) {
@@ -35,8 +35,12 @@ public class Server {
         return false;
     }
 
+    public void addNewClient(String pAccount, ClientThread pClient) {
+        iClients.put(pAccount, pClient);
+    }
+
     public void broadcast() {
-        List<String> active_users = new ArrayList<String>(iClients.keySet());
+        ArrayList<String> active_users = new ArrayList<String>(iClients.keySet());
 
         for (ClientThread client : iClients.values()) {
             client.sendPackage("NEW-CLIENT", active_users);
@@ -55,8 +59,8 @@ public class Server {
             while (true) {
                 Socket socket = server_socket.accept();
                 System.out.println("New client connected");
-
-
+                ClientThread new_client = new ClientThread(socket, this);
+                new_client.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,6 +72,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-
+        Server server = new Server();
+        server.execute();
     }
 }
