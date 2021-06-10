@@ -7,10 +7,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 
 class ServerController implements Runnable {
     Socket iSocket = null;
@@ -27,11 +25,24 @@ class ServerController implements Runnable {
             iInStream = new ObjectInputStream(iSocket.getInputStream());
             iOutStream = new ObjectOutputStream(iSocket.getOutputStream());
             iThread = new Thread(this);
-            iThread.start();
-            iThread.join();
-        } catch (InterruptedException | IOException err) {
+        } catch (IOException err) {
             System.exit(1);
         }
+    }
+
+    public void start() throws InterruptedException {
+        iThread.start();
+        iThread.join();
+    }
+
+    private ArrayList<String> getActiveClients() {
+        ArrayList<String> clients = new ArrayList<String>();
+
+        for (var key : iClients.keySet()) {
+            clients.add((String) key);
+        }
+
+        return clients;
     }
 
     public void run() {
@@ -63,31 +74,18 @@ class ServerController implements Runnable {
                         sendPackage("0", null);
                     }
                 }
-            } else if (box.getiMessage().equals("LOAD-CLIENTS")) {
-                ArrayList<String> clients = new ArrayList<String>();
-
-                for (var key : iClients.keySet()) {
-                    clients.add((String) key);
-                }
-
-                sendPackage("UPDATE-CLIENTS", clients);
-            } else if (box.getiMessage().equals("SEND-MESSAGE")) {
+            } else if (box.getiMessage().equals("CHATTING")) {
+                System.out.println("chatting");
                 Message mess = (Message) box.getiContent();
                 String from = mess.getIFrom();
                 String to = mess.getiTo();
                 String content = mess.getiContent();
 
                 Server.iClientSockets.get(to).sendPackage("RECEIVE-MESSAGE", mess);
-            } else if (box.getiMessage().equals("RECEIVE-MESSAGE")) {
-                Message mess = (Message) box.getiContent();
-                String from = mess.getIFrom();
-                String to = mess.getiTo();
-                String content = mess.getiContent();
-
-                ChatUI.iFrames.get(from).vContent.append(from + ": " + content + "\n");
             } else if (box.getiMessage().equals("KEEP-CONNECT")) {
                 User user = (User) box.getiContent();
                 Server.iClientSockets.put(user.getiAccount(), this);
+                sendPackage("UPDATE-CLIENTS", getActiveClients());
             }
         } catch (IOException | ClassNotFoundException err) {
             System.exit(1);
@@ -139,9 +137,12 @@ public class Server {
         do {
             try {
                 Socket client = iSocket.accept();
-                new ServerController(client, iClients);
-            } catch (IOException err) {
+                System.out.println("new client");
+                var tmp = new ServerController(client, iClients);
 
+                tmp.start();
+            } catch (IOException | InterruptedException err) {
+                continue;
             }
         } while (true);
     }

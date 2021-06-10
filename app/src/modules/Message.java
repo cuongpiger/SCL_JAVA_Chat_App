@@ -1,6 +1,8 @@
 package modules;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private String iFrom;
     private String iContent;
     private String iTo;

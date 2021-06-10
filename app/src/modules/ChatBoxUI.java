@@ -3,7 +3,6 @@ package modules;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 
 public class ChatBoxUI extends JFrame implements ActionListener {
     private JPanel panel1;
@@ -21,7 +20,6 @@ public class ChatBoxUI extends JFrame implements ActionListener {
         super(pTitle);
         iFriend = pTitle;
         setContentPane(panel1);
-        ClientController.sendPackage("KEEP-CONNECT", null);
         vSend.addActionListener(this);
     }
 
@@ -31,7 +29,7 @@ public class ChatBoxUI extends JFrame implements ActionListener {
                 Message mess = new Message(LoginUI.iUser.getiAccount(), iFriend, vText.getText());
                 vContent.append(LoginUI.iUser.getiAccount() + ": " + vText.getText() + "\n");
                 vText.setText("");
-                ClientController.sendPackage("SEND-MESSAGE", mess);
+                ClientController.sendPackage("CHATTING", mess);
             }
         }
     }

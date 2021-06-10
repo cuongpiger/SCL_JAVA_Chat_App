@@ -27,7 +27,9 @@ public class ClientController implements Runnable {
         iThread = new Thread(this);
         iThread.start();
 
-        loadClients();
+        sendPackage("KEEP-CONNECT", LoginUI.iUser);
+        sendPackage("KEEP-CONNECT", LoginUI.iUser);
+
     }
 
     public void run() {
@@ -43,7 +45,7 @@ public class ClientController implements Runnable {
                     }
                     iUI.vChat.append(client + "\n");
                 }
-            } else if (box.getiMessage().equals("SEND-MESSAGE")) {
+            } else if (box.getiMessage().equals("RECEIVE-MESSAGE")) {
                 Message mess = (Message) box.getiContent();
 
                 for (var friend : ChatUI.iFrames.keySet()) {
@@ -58,15 +60,12 @@ public class ClientController implements Runnable {
         }
     }
 
-    public static void loadClients() {
-        sendPackage("LOAD-CLIENTS", null);
-    }
-
     public static void sendPackage(String pMessage, Object pContent) {
         Package box = new Package("CLIENT", pMessage, pContent);
         try {
             iOutStream.writeObject(box);
         } catch (IOException err) {
+            err.printStackTrace();
             System.exit(1);
         }
     }
