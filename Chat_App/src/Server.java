@@ -1,12 +1,10 @@
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class Server {
+public class Server extends Thread {
     private static HostInfo iLocal = null;
     private static Map<String, String> iUsers = null;
     private static Map<String, ClientThread> iClients = null;
@@ -15,6 +13,10 @@ public class Server {
         iLocal = Utils.loadHostInfo("./config/master.txt");
         iUsers = new HashMap<String, String>();
         iClients = new HashMap<String, ClientThread>();
+    }
+
+    public HostInfo getiLocal() {
+        return iLocal;
     }
 
     public boolean signup(User pNewUser) {
@@ -52,7 +54,7 @@ public class Server {
         client.sendPackage("CHATTING", pMessage);
     }
 
-    public void execute() {
+    public void run() {
         try (ServerSocket server_socket = new ServerSocket(iLocal.getiPort())) {
             System.out.println("Server is running on PORT: " + iLocal.getiPort());
 
@@ -71,8 +73,8 @@ public class Server {
         iClients.remove(iAccount);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SocketException {
         Server server = new Server();
-        server.execute();
+        server.start();
     }
 }

@@ -3,6 +3,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 public class ChatUI extends JFrame implements ActionListener {
     private JPanel panel1;
@@ -25,6 +26,7 @@ public class ChatUI extends JFrame implements ActionListener {
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         vChat.requestFocus();
         vSend.addActionListener(this);
+        vFile.addActionListener(this);
     }
 
     public void actionPerformed(ActionEvent pEvent) {
@@ -37,6 +39,18 @@ public class ChatUI extends JFrame implements ActionListener {
 
                 vChat.setText("");
                 vContent.append("Me: " + content + "\n");
+            }
+        }
+
+        if (pEvent.getSource() == vFile) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String file_path = selectedFile.getAbsolutePath();
+
+
             }
         }
     }
