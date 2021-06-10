@@ -43,7 +43,7 @@ public class ClientController implements Runnable {
                     }
                     iUI.vChat.append(client + "\n");
                 }
-            } else if (box.getiMessage().equals("CHATTING")) {
+            } else if (box.getiMessage().equals("SEND-MESSAGE")) {
                 Message mess = (Message) box.getiContent();
 
                 for (var friend : ChatUI.iFrames.keySet()) {
@@ -62,7 +62,7 @@ public class ClientController implements Runnable {
         sendPackage("LOAD-CLIENTS", null);
     }
 
-    private static void sendPackage(String pMessage, Object pContent) {
+    public static void sendPackage(String pMessage, Object pContent) {
         Package box = new Package("CLIENT", pMessage, pContent);
         try {
             iOutStream.writeObject(box);

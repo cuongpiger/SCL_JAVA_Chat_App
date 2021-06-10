@@ -1,6 +1,4 @@
-import modules.HostInfo;
-import modules.User;
-import modules.Utils;
+import modules.*;
 import modules.Package;
 
 import java.io.IOException;
@@ -73,6 +71,23 @@ class ServerController implements Runnable {
                 }
 
                 sendPackage("UPDATE-CLIENTS", clients);
+            } else if (box.getiMessage().equals("SEND-MESSAGE")) {
+                Message mess = (Message) box.getiContent();
+                String from = mess.getIFrom();
+                String to = mess.getiTo();
+                String content = mess.getiContent();
+
+                Server.iClientSockets.get(to).sendPackage("RECEIVE-MESSAGE", mess);
+            } else if (box.getiMessage().equals("RECEIVE-MESSAGE")) {
+                Message mess = (Message) box.getiContent();
+                String from = mess.getIFrom();
+                String to = mess.getiTo();
+                String content = mess.getiContent();
+
+                ChatUI.iFrames.get(from).vContent.append(from + ": " + content + "\n");
+            } else if (box.getiMessage().equals("KEEP-CONNECT")) {
+                User user = (User) box.getiContent();
+                Server.iClientSockets.put(user.getiAccount(), this);
             }
         } catch (IOException | ClassNotFoundException err) {
             System.exit(1);
@@ -104,12 +119,14 @@ public class Server {
     private static ServerSocket iSocket = null;
     private static HostInfo iServer = null;
     private static Map<String, String> iClients = null;
+    public static Map<String, ServerController> iClientSockets = null;
 
     public static void main(String[] args) {
         iServer = Utils.loadHostInfo("./config/master.txt");
         iClients = new HashMap<String, String>();
         User cuongpiger = new User("cuongpiger", "Cuong*0902902209");
         iClients.put(cuongpiger.getiAccount(), cuongpiger.getiPassword());
+        iClientSockets = new HashMap<String, ServerController>();
 
         try {
             iSocket = new ServerSocket(iServer.getiPort());

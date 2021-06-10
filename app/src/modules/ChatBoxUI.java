@@ -19,10 +19,16 @@ public class ChatBoxUI extends JFrame implements ActionListener {
     public ChatBoxUI(String pTitle) {
         super(pTitle);
         setContentPane(panel1);
+        ClientController.sendPackage("KEEP-CONNECT", null);
+        vSend.addActionListener(this);
     }
 
     public void actionPerformed(ActionEvent pae) {
+        if (pae.getSource() == vSend) {
+            if (vText.getText().isEmpty() == false) {
 
+            }
+        }
     }
 
 }
