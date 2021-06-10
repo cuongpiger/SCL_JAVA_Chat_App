@@ -26,7 +26,9 @@
               <component id="85a55" class="javax.swing.JTextArea" binding="vContent">
                 <constraints/>
                 <properties>
+                  <lineWrap value="true"/>
                   <text value=""/>
+                  <wrapStyleWord value="true"/>
                 </properties>
               </component>
             </children>
@@ -57,16 +59,22 @@
               <text value="File"/>
             </properties>
           </component>
-          <component id="bc139" class="javax.swing.JTextArea" binding="vChat">
+          <scrollpane id="cb7e3">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="50"/>
-              </grid>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="43a2c" class="javax.swing.JTextArea" binding="vChat">
+                <constraints/>
+                <properties>
+                  <lineWrap value="true"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
     </children>

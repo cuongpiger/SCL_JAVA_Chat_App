@@ -55,6 +55,8 @@ public class HomeUI extends JFrame implements ActionListener {
             if (iActiveClients.contains(friend)) {
                 iUIs.put(friend, creatNewChatUI(friend));
             }
+
+            vAccount.setText("");
         }
     }
 }
