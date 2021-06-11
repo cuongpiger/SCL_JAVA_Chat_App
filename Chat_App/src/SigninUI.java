@@ -1,9 +1,11 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class SigninUI extends JFrame implements ActionListener {
     private JPanel panel1;
@@ -21,9 +23,14 @@ public class SigninUI extends JFrame implements ActionListener {
     public void showHomePage() {
         iHomeUI = new HomeUI("Home", iClient);
         iHomeUI.setSize(350, 500);
-        iHomeUI.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         iHomeUI.setLocationRelativeTo(null);
         iHomeUI.setVisible(true);
+
+        iHomeUI.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                iClient.sendPackage("CLOSE", iClient.getiUsername());
+            }
+        });
     }
 
     public void updateHomepage(ArrayList<String> pClients) {
@@ -40,9 +47,6 @@ public class SigninUI extends JFrame implements ActionListener {
 
         vSignIn.addActionListener(this);
         vSignUp.addActionListener(this);
-
-        iClient = new Client(this);
-        iClient.start();
     }
 
     public User signupUser() {
@@ -54,14 +58,13 @@ public class SigninUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent pEvent) {
         if (pEvent.getSource() == vSignUp) {
             User signup_user = signupUser();
-
-            iClient.sendPackage("SIGN-UP", signup_user);
+            new ClientSignUp(this, signup_user).start();
         }
 
         if (pEvent.getSource() == vSignIn) {
             User signup_user = signupUser();
-            iClient.sendPackage("SIGN-IN", signup_user);
-            iClient.setiUsername(signup_user.getiAccount());
+            iClient = new Client(this, signup_user);
+            iClient.start();
         }
     }
 }

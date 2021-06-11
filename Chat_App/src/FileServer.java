@@ -53,7 +53,7 @@ class FileController extends Thread {
                     createFileInResources(file_info);
                     Message message = new Message(file_info.getiFrom(), file_info.getiTo(),
                             "[FILE] " + file_info.getiFilename());
-                    iServer.sendMessage(message);
+                    iServer.sendMessage("CHATTING", message);
                 }
             } else if (box.getiService().equals("DOWNLOAD")) {
                 String filename = (String) box.getiContent();

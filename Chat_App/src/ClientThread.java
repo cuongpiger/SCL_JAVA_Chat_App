@@ -9,11 +9,15 @@ public class ClientThread extends Thread {
     private ObjectInputStream iInStream;
     private ObjectOutputStream iOutStream;
 
-    public ClientThread(Socket pSocket, Server pServer) throws IOException {
-        iSocket = pSocket;
-        iServer = pServer;
-        iInStream = new ObjectInputStream(iSocket.getInputStream());
-        iOutStream = new ObjectOutputStream(iSocket.getOutputStream());
+    public ClientThread(Socket pSocket, Server pServer) {
+        try {
+            iSocket = pSocket;
+            iServer = pServer;
+            iInStream = new ObjectInputStream(iSocket.getInputStream());
+            iOutStream = new ObjectOutputStream(iSocket.getOutputStream());
+        } catch (IOException err) {
+            err.printStackTrace();
+        }
     }
 
     private Object receivePackage() {
@@ -37,41 +41,42 @@ public class ClientThread extends Thread {
     }
 
     public void run() {
-        while (true) {
-            try {
-                Package box = (Package) receivePackage();
+        try {
+            Package box = (Package) receivePackage();
 
-                if (box.getiService().equals("SIGN-UP")) {
-                    User user = (User) box.getiContent();
-                    sendPackage("SIGN-UP", iServer.signup(user));
-                } else if (box.getiService().equals("SIGN-IN")) {
-                    User user = (User) box.getiContent();
+            if (box.getiService().equals("SIGN-IN")) {
+                User user = (User) box.getiContent();
 
-                    if (iServer.signin(user)) { // login success
-                        sendPackage("SIGN-IN", true);
-                        iServer.addNewClient(user.getiAccount(), this);
-                        iServer.broadcast(); // broadcast new users joined
+                if (iServer.signin(user)) { // login success
+                    sendPackage("SIGN-IN", true);
+                    iServer.addNewClient(user.getiAccount(), this);
+                    iServer.broadcast(); // broadcast new users joined
 
-                        do {
-                            box = (Package) receivePackage();
+                    while (true) {
+                        System.out.println(box.getiService());
 
-                            if (box.getiService().equals("CHATTING")) {
-                                Message message = (Message) box.getiContent();
-                                iServer.sendMessage(message);
-                            }
-                        } while (!box.getiService().equals("CLOSE"));
+                        box = (Package) receivePackage();
 
-                        iServer.removeClient(user.getiPassword());
-                        iSocket.close();
-
-                        iServer.broadcast();
-                    } else { // login failed
-                        sendPackage("SIGN-IN", false);
+                        if (box.getiService().equals("CHATTING")) {
+                            Message message = (Message) box.getiContent();
+                            iServer.sendMessage("CHATTING", message);
+                        } else if (box.getiService().equals("CLOSE")) {
+                            iServer.sendMessage("CLOSE", new Message(null, user.getiAccount(), null));
+                            break;
+                        };
                     }
+
+                    iServer.removeClient(user.getiAccount());
+                    iServer.broadcast();
+                    iSocket.close();
+                } else { // login failed
+                    sendPackage("SIGN-IN", false);
+                    iSocket.close();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -5,7 +5,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Map;
 
 class ClientListener extends Thread {
     private static Socket iSocket;
@@ -34,62 +33,71 @@ class ClientListener extends Thread {
     }
 
     public void run() {
-        while (true) {
-            try {
-                Package box = (Package) receivePackage();
+        try {
+            Package box = (Package) receivePackage();
 
-                if (box.getiService().equals("SIGN-UP")) {
-                    boolean checker = (boolean) box.getiContent();
-                    String alert = checker ? "Sign up success." : "Registration failed!";
-                    iUI.showDialog(alert);
-                } else if (box.getiService().equals("SIGN-IN")) {
-                    boolean checker = (boolean) box.getiContent();
+            if (box.getiService().equals("SIGN-IN")) {
+                boolean checker = (boolean) box.getiContent();
 
-                    if (!checker) {
-                        iUI.showDialog("Login unsuccessful!");
-                    } else {
-                        iUI.setVisible(false);
-                        iUI.showHomePage();
+                if (!checker) {
+                    iUI.showDialog("Login unsuccessful!");
+                    iSocket.close();
+                } else {
+                    iUI.setVisible(false);
+                    iUI.showHomePage();
+
+                    while (true) {
+                        box = (Package) receivePackage();
+
+                        if (box.getiService().equals("NEW-CLIENT")) {
+                            ArrayList<String> clients = (ArrayList<String>) box.getiContent();
+                            clients.remove(iClient.getiUsername());
+                            iUI.updateHomepage(clients);
+                        } else if (box.getiService().equals("CHATTING")) {
+                            Message message = (Message) box.getiContent();
+                            iUI.updateChatUI(message);
+                        } else if (box.getiService().equals("CLOSE")) {
+                            break;
+                        }
+
+                        System.out.println(box.getiService());
                     }
-                } else if (box.getiService().equals("NEW-CLIENT")) {
-                    ArrayList<String> clients = (ArrayList<String>) box.getiContent();
-                    clients.remove(iClient.getiUsername());
-                    iUI.updateHomepage(clients);
-                } else if (box.getiService().equals("CHATTING")) {
-                    Message message = (Message) box.getiContent();
-                    iUI.updateChatUI(message);
+
+                    iSocket.close();
+                    System.exit(0);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
 
 public class Client extends Thread {
     private static HostInfo iServer;
-    private static String iUsername;
+    private static User iUser;
     private static ObjectOutputStream iOutStream;
     private static SigninUI iUI;
+    private static ClientListener iListener;
+    private static Socket iSocket;
 
-    public Client(SigninUI pUI) {
+    public Client(SigninUI pUI, User pUser) {
         iServer = Utils.loadHostInfo("./config/master.txt");
         iUI = pUI;
-    }
-
-    public void setiUsername(String pUsername) {
-        iUsername = pUsername;
+        iUser = pUser;
     }
 
     public String getiUsername() {
-        return iUsername;
+        return iUser.getiAccount();
     }
 
     public void run() {
         try {
-            Socket socket = new Socket(iServer.getiAddress(), iServer.getiPort());
-            iOutStream = new ObjectOutputStream(socket.getOutputStream());
-            new ClientListener(socket, this, iUI).start();
+            iSocket = new Socket(iServer.getiAddress(), iServer.getiPort());
+            iOutStream = new ObjectOutputStream(iSocket.getOutputStream());
+            sendPackage("SIGN-IN", iUser);
+            iListener = new ClientListener(iSocket, this, iUI);
+            iListener.start();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
