@@ -59,8 +59,6 @@ class ClientListener extends Thread {
                         } else if (box.getiService().equals("CLOSE")) {
                             break;
                         }
-
-                        System.out.println(box.getiService());
                     }
 
                     iSocket.close();

@@ -53,8 +53,6 @@ public class ClientThread extends Thread {
                     iServer.broadcast(); // broadcast new users joined
 
                     while (true) {
-                        System.out.println(box.getiService());
-
                         box = (Package) receivePackage();
 
                         if (box.getiService().equals("CHATTING")) {
