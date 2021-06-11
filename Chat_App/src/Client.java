@@ -37,17 +37,16 @@ class ClientListener extends Thread {
         while (true) {
             try {
                 Package box = (Package) receivePackage();
-                System.out.println("get a response");
 
                 if (box.getiService().equals("SIGN-UP")) {
                     boolean checker = (boolean) box.getiContent();
-                    String alert = checker ? "Dang ki thanh cong" : "Dang ki ko thanh cong";
+                    String alert = checker ? "Sign up success." : "Registration failed!";
                     iUI.showDialog(alert);
                 } else if (box.getiService().equals("SIGN-IN")) {
                     boolean checker = (boolean) box.getiContent();
 
                     if (!checker) {
-                        iUI.showDialog("Dang nhap ko thanh cong");
+                        iUI.showDialog("Login unsuccessful!");
                     } else {
                         iUI.setVisible(false);
                         iUI.showHomePage();
@@ -90,7 +89,6 @@ public class Client extends Thread {
         try {
             Socket socket = new Socket(iServer.getiAddress(), iServer.getiPort());
             iOutStream = new ObjectOutputStream(socket.getOutputStream());
-            System.out.println("Connected to the server.");
             new ClientListener(socket, this, iUI).start();
         } catch (UnknownHostException e) {
             e.printStackTrace();

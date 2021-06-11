@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChatUI extends JFrame implements ActionListener {
     private JPanel panel1;
@@ -13,6 +16,7 @@ public class ChatUI extends JFrame implements ActionListener {
     private JTextArea vChat;
     private static Client iClient;
     private static String iFriend;
+    private static final Pattern pattern = Pattern.compile("^\\$pull (.+)");
 
     public ChatUI(String pTitle, Client pClient) {
         super(pTitle);
@@ -31,14 +35,22 @@ public class ChatUI extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent pEvent) {
         if (pEvent.getSource() == vSend) {
-            String content = vChat.getText();
+            String content = vChat.getText().strip();
 
             if (content.isEmpty() == false) {
-                Message message = new Message(iClient.getiUsername(), iFriend, content);
-                iClient.sendPackage("CHATTING", message);
+                Matcher matcher = pattern.matcher(content);
+
+                if (matcher.find()) {
+                    String file_path = matcher.group(1);
+                    new Downloader(file_path).start();
+                } else {
+                    Message message = new Message(iClient.getiUsername(), iFriend, content);
+                    iClient.sendPackage("CHATTING", message);
+
+                    vContent.append("Me: " + content + "\n");
+                }
 
                 vChat.setText("");
-                vContent.append("Me: " + content + "\n");
             }
         }
 

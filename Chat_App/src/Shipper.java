@@ -17,7 +17,6 @@ public class Shipper extends Thread {
 
         try {
             iSocket = new Socket(iAddress, 4321);
-            System.out.println("Send file");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -27,22 +26,13 @@ public class Shipper extends Thread {
 
     public void run() {
         try {
-            DataOutputStream dos = new DataOutputStream(iSocket.getOutputStream());
             FileInfo file_info = getFileInfo();
             ObjectOutputStream oos = new ObjectOutputStream(iSocket.getOutputStream());
             oos.writeObject(new Package("UPLOAD", file_info));
-            ObjectInputStream ois = new ObjectInputStream(iSocket.getInputStream());
-            file_info = (FileInfo) ois.readObject();
-
-            if (file_info != null) {
-                System.out.println(file_info.getiStatus());
-            }
 
             closeStream(oos);
-            closeStream(ois);
-            closeStream(dos);
             closeSocket(iSocket);
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -57,11 +57,11 @@ public class Server {
     public void execute() {
         new FileServer(this).start();
         try (ServerSocket server_socket = new ServerSocket(iLocal.getiPort())) {
-            System.out.println("Server is running on PORT: " + iLocal.getiPort());
+            System.out.println("MASTER SERVER is running on PORT: " + iLocal.getiPort());
 
             while (true) {
                 Socket socket = server_socket.accept();
-                System.out.println("New client connected");
+                System.out.println("MASTER SERVER: new client connected");
                 ClientThread new_client = new ClientThread(socket, this);
                 new_client.start();
             }

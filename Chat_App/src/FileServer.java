@@ -24,7 +24,7 @@ public class FileServer extends Thread {
 
             try {
                 client = iSocket.accept();
-                System.out.println("FILE SERVER: new client");
+                System.out.println("FILE SERVER: new client connected");
                 new FileController(client, iServer).start();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -44,33 +44,48 @@ class FileController extends Thread {
 
     public void run() {
         try {
-            DataInputStream dis = new DataInputStream(iSocket.getInputStream());
             ObjectInputStream ois = new ObjectInputStream(iSocket.getInputStream());
-
             Package box = (Package) ois.readObject();
 
             if (box.getiService().equals("UPLOAD")) {
                 FileInfo file_info = (FileInfo) box.getiContent();
                 if (file_info != null) {
                     createFileInResources(file_info);
+                    Message message = new Message(file_info.getiFrom(), file_info.getiTo(),
+                            "[FILE] " + file_info.getiFilename());
+                    iServer.sendMessage(message);
                 }
-
+            } else if (box.getiService().equals("DOWNLOAD")) {
+                String filename = (String) box.getiContent();
+                FileInfo file_info = getFileInfo(filename);
                 ObjectOutputStream oos = new ObjectOutputStream(iSocket.getOutputStream());
-                file_info.setiStatus("SUCCESS");
-                file_info.setiDataBytes(null);
                 oos.writeObject(file_info);
 
                 closeStream(oos);
-
-                Message message = new Message(file_info.getiFrom(), file_info.getiTo(),
-                        "[FILE] " + file_info.getiFilename());
-                iServer.sendMessage(message);
             }
             closeStream(ois);
-            closeStream(dis);
+            closeSocket(iSocket);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private FileInfo getFileInfo(String pFilename) {
+        FileInfo fileInfo = null;
+        BufferedInputStream bis = null;
+        try {
+            File sourceFile = new File("./resources/" + pFilename);
+            bis = new BufferedInputStream(new FileInputStream(sourceFile));
+            byte[] fileBytes = new byte[(int) sourceFile.length()];
+            // get file info
+            bis.read(fileBytes, 0, fileBytes.length);
+            fileInfo = new FileInfo(null, null, pFilename, fileBytes);
+        } catch (IOException ex) {
+            return null;
+        } finally {
+            closeStream(bis);
+        }
+        return fileInfo;
     }
 
     private void createFileInResources(FileInfo pFile) {
